@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using App.ExtendMethods;
 
 namespace App
 {
@@ -37,6 +38,7 @@ namespace App
             });
             // services.AddSingleton<ProductService>();
             services.AddSingleton(typeof(ProductService), typeof(ProductService));
+            services.AddSingleton<PlanetService>();
             // services.AddSingleton no chi tao ra doi tuong dich vu
             // services.AddTransient moi lan truy van de lay ra dich vu thi mot doi tuong moi duoc tao ra
             // services.AddScoped moi phien truy cap lay dich vu nay ra thi mot doi tuong moi duoc tao ra
@@ -58,6 +60,8 @@ namespace App
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.AddStatusCodePage(); // Tuy bien response loi: 400-599
+
             app.UseRouting();
 
             app.UseAuthentication();
@@ -65,9 +69,32 @@ namespace App
 
             app.UseEndpoints(endpoints =>
             {
+                // endpoints.MapControllers
+                // endpoints.MapControllerRoute
+                // endpoints.MapDefaultControllerRoute
+                // endpoints.MapAreaControllerRoute  
+
+                endpoints.MapControllers();
+
+                endpoints.MapAreaControllerRoute(
+                    name: "product",
+                    pattern: "/{controller}/{action=Index}/{id?}",
+                    areaName: "ProductManager"
+                );
+
+                endpoints.MapControllerRoute(
+                    name: "first",
+                    pattern: "/{Url:regex(^((xemsanpham)|(viewproduct))$)}/{id:range(2,4)}",
+                    defaults: new {
+                        controller = "First",
+                        action = "ViewProduct"
+                    }
+                );
+
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "/{controller=Home}/{action=Index}/{id?}"
+                );              
 
                 endpoints.MapRazorPages();
             });
